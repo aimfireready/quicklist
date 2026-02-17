@@ -26,6 +26,12 @@
     background-color: var(--bs-primary-bg-subtle);
 }
 
+/* Item rows */
+#item-list .list-group-item {
+    border: 1px solid var(--bs-border-color);
+    margin-bottom: -1px;
+}
+
 /* Preserve newlines in multi-line item text */
 .item-text {
     white-space: pre-wrap;
