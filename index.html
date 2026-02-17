@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickList</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/1WR6zNiDaGFIo/Iu4q3hDcLgz7fmkH"
+          crossorigin="anonymous">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet">
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+
+<div id="app" v-cloak>
+
+    <!-- ── Navbar ─────────────────────────────────────────────────────── -->
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container" style="max-width: 720px;">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-list-check me-1"></i>QuickList
+            </span>
+            <button class="btn btn-outline-light btn-sm" @click="newList">
+                <i class="bi bi-plus-lg me-1"></i>New List
+            </button>
+        </div>
+    </nav>
+
+    <!-- ── Main content ───────────────────────────────────────────────── -->
+    <div class="container" style="max-width: 720px;">
+
+        <!-- Add Item --------------------------------------------------- -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <textarea
+                    id="new-item-textarea"
+                    class="form-control mb-2"
+                    v-model="newItemText"
+                    placeholder="Add a new item…"
+                    rows="1"
+                    @input="autoResize($event)"
+                    @keydown.ctrl.enter="addItem"
+                    @keydown.meta.enter="addItem"
+                ></textarea>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-body-secondary">
+                        Ctrl+Enter to add
+                    </small>
+                    <button
+                        class="btn btn-primary btn-sm"
+                        @click="addItem"
+                        :disabled="!newItemText.trim()"
+                    >
+                        <i class="bi bi-plus-lg me-1"></i>Add
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items list ------------------------------------------------- -->
+        <div class="card mb-3 shadow-sm" v-show="items.length">
+            <ul class="list-group list-group-flush" id="item-list">
+                <li
+                    class="list-group-item d-flex align-items-start gap-2 py-2"
+                    v-for="item in items"
+                    :key="item.id"
+                >
+                    <!-- Drag handle -->
+                    <span class="drag-handle mt-1" title="Drag to reorder">
+                        <i class="bi bi-grip-vertical"></i>
+                    </span>
+
+                    <!-- View mode -->
+                    <template v-if="editingId !== item.id">
+                        <div class="flex-grow-1 item-text py-1"
+                             @dblclick="startEdit(item)">
+                            {{ item.text }}
+                        </div>
+                        <div class="d-flex gap-1 flex-shrink-0">
+                            <button
+                                class="btn btn-outline-secondary btn-sm"
+                                @click="startEdit(item)"
+                                title="Edit"
+                            ><i class="bi bi-pencil"></i></button>
+                            <button
+                                class="btn btn-outline-danger btn-sm"
+                                @click="deleteItem(item.id)"
+                                title="Delete"
+                            ><i class="bi bi-trash"></i></button>
+                        </div>
+                    </template>
+
+                    <!-- Edit mode -->
+                    <template v-else>
+                        <div class="flex-grow-1">
+                            <textarea
+                                class="form-control edit-textarea mb-1"
+                                v-model="editingText"
+                                @keydown.ctrl.enter="saveEdit(item)"
+                                @keydown.meta.enter="saveEdit(item)"
+                                @keydown.escape="cancelEdit"
+                                @input="autoResize($event)"
+                            ></textarea>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-success btn-sm"
+                                        @click="saveEdit(item)">
+                                    <i class="bi bi-check-lg me-1"></i>Save
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        @click="cancelEdit">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Empty state ------------------------------------------------ -->
+        <div class="text-center text-body-secondary py-5" v-show="!items.length">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            <p class="mb-0">Your list is empty. Add an item above to get started.</p>
+        </div>
+
+        <!-- Footer: link + count -------------------------------------- -->
+        <div class="d-flex justify-content-between align-items-center mb-4 px-1">
+            <span class="list-url-display text-body-secondary text-truncate me-2"
+                  style="max-width: 75%;"
+                  :title="listUrl">
+                {{ listUrl }}
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-body-secondary" v-show="items.length">
+                    {{ itemCount }} item{{ itemCount === 1 ? '' : 's' }}
+                </small>
+                <button class="btn btn-outline-secondary btn-sm"
+                        @click="copyLink">
+                    <i class="bi me-1"
+                       :class="copied ? 'bi-check-lg' : 'bi-clipboard'"></i>
+                    {{ copied ? 'Copied!' : 'Copy Link' }}
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /container -->
+
+</div><!-- /app -->
+
+<!-- ── Scripts (loaded before module so globals are available) ─────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+<!-- App (ES module — deferred, runs after the above scripts) -->
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

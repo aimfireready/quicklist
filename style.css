@@ -1,0 +1,46 @@
+/* Hide Vue template syntax until app mounts */
+[v-cloak] {
+    display: none;
+}
+
+/* Drag handle */
+.drag-handle {
+    cursor: grab;
+    opacity: 0.35;
+    user-select: none;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.drag-handle:hover {
+    opacity: 0.75;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* SortableJS ghost (placeholder while dragging) */
+.sortable-ghost {
+    opacity: 0.25;
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+/* Preserve newlines in multi-line item text */
+.item-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    cursor: default;
+}
+
+/* Auto-resizing textareas */
+textarea.form-control {
+    resize: none;
+    overflow: hidden;
+}
+
+/* Subtle footer link display */
+.list-url-display {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.8rem;
+}
