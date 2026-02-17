@@ -25,6 +25,9 @@ createApp({
         const editingId    = ref(null);
         const editingText  = ref('');
         const copied       = ref(false);
+        const listTitle    = ref('My List');
+        const isEditingTitle = ref(false);
+        const editingTitleText = ref('');
         let   sortableInstance = null;
 
         // If no list id in the URL, generate one and update the hash.
@@ -46,6 +49,36 @@ createApp({
 
         function saveItems() {
             storage.save(listId.value, items.value);
+        }
+
+        function loadTitle() {
+            listTitle.value = storage.loadTitle(listId.value);
+        }
+
+        // ── Title editing ─────────────────────────────────────────────────
+        function startEditTitle() {
+            editingTitleText.value = listTitle.value;
+            isEditingTitle.value = true;
+            nextTick(() => {
+                const input = document.getElementById('title-input');
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            });
+        }
+
+        function saveTitleEdit() {
+            const text = editingTitleText.value.trim();
+            if (text) {
+                listTitle.value = text;
+                storage.saveTitle(listId.value, text);
+            }
+            isEditingTitle.value = false;
+        }
+
+        function cancelTitleEdit() {
+            isEditingTitle.value = false;
         }
 
         // ── CRUD ─────────────────────────────────────────────────────────
@@ -109,6 +142,8 @@ createApp({
             items.value      = [];
             editingId.value  = null;
             newItemText.value = '';
+            listTitle.value  = 'My List';
+            isEditingTitle.value = false;
         }
 
         function copyLink() {
@@ -151,7 +186,9 @@ createApp({
             if (newId && newId !== listId.value) {
                 listId.value    = newId;
                 editingId.value = null;
+                isEditingTitle.value = false;
                 loadItems();
+                loadTitle();
                 initSortable();
             }
         });
@@ -166,6 +203,7 @@ createApp({
         // ── Lifecycle ────────────────────────────────────────────────────
         onMounted(() => {
             loadItems();
+            loadTitle();
             initSortable();
         });
 
@@ -173,7 +211,9 @@ createApp({
         return {
             listId, items, newItemText, editingId, editingText,
             listUrl, copied, itemCount,
+            listTitle, isEditingTitle, editingTitleText,
             addItem, deleteItem, startEdit, saveEdit, cancelEdit,
+            startEditTitle, saveTitleEdit, cancelTitleEdit,
             newList, copyLink, autoResize,
         };
     },

@@ -19,6 +19,16 @@ export function remove(uuid) {
     localStorage.removeItem(PREFIX + uuid);
 }
 
+const TITLE_PREFIX = 'quicklist_title_';
+
+export function loadTitle(uuid) {
+    return localStorage.getItem(TITLE_PREFIX + uuid) || 'My List';
+}
+
+export function saveTitle(uuid, title) {
+    localStorage.setItem(TITLE_PREFIX + uuid, title);
+}
+
 /**
  * Listen for storage changes made by other tabs/windows.
  * Calls callback(uuid, items) when a quicklist key is modified externally.

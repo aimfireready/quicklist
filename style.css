@@ -26,6 +26,17 @@
     background-color: var(--bs-primary-bg-subtle);
 }
 
+/* Editable list title */
+.list-title {
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.list-title:hover {
+    background-color: var(--bs-gray-200);
+}
+
 /* Item rows */
 #item-list .list-group-item {
     border: 1px solid var(--bs-border-color);

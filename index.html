@@ -35,6 +35,24 @@
     <!-- ── Main content ───────────────────────────────────────────────── -->
     <div class="container" style="max-width: 720px;">
 
+        <!-- List Title ------------------------------------------------ -->
+        <div class="mb-3">
+            <h4 v-if="!isEditingTitle"
+                class="list-title mb-0"
+                @click="startEditTitle"
+                title="Click to edit title">
+                {{ listTitle }}
+            </h4>
+            <input v-else
+                id="title-input"
+                class="form-control form-control-lg fw-semibold"
+                v-model="editingTitleText"
+                @keydown.enter.prevent="saveTitleEdit"
+                @keydown.escape="cancelTitleEdit"
+                @blur="saveTitleEdit"
+            >
+        </div>
+
         <!-- Add Item --------------------------------------------------- -->
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
